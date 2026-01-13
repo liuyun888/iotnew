@@ -1,0 +1,97 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package io.github.pnoker.driver.key;
+
+import io.github.pnoker.common.utils.HostUtil;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.eclipse.milo.opcua.stack.core.util.SelfSignedCertificateBuilder;
+import org.eclipse.milo.opcua.stack.core.util.SelfSignedCertificateGenerator;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.*;
+import java.security.cert.X509Certificate;
+import java.util.regex.Pattern;
+
+/**
+ * @author pnoker
+ * @version 2025.9.0
+ * @since 2022.1.0
+ */
+@Slf4j
+public class KeyLoader {
+    private static final Pattern IP_ADDR_PATTERN = Pattern.compile("^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
+    private static final char[] PASSWORD = "password".toCharArray();
+    private static final String CLIENT_ALIAS = "client-ai";
+    @Getter
+    private X509Certificate clientCertificate;
+    @Getter
+    private KeyPair clientKeyPair;
+
+    public KeyLoader load(Path baseDir) throws Exception {
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        Path serverKeyStore = baseDir.resolve("dc3-opc-ua-client.pfx");
+
+        if (!Files.exists(serverKeyStore)) {
+            keyStore.load(null, PASSWORD);
+            KeyPair keyPair = SelfSignedCertificateGenerator.generateRsaKeyPair(2048);
+            SelfSignedCertificateBuilder builder = new SelfSignedCertificateBuilder(keyPair)
+                    .setCommonName("DC3 Opc Ua Client")
+                    .setOrganization("dc3")
+                    .setOrganizationalUnit("iot")
+                    .setLocalityName("BeiJing")
+                    .setStateName("BJ")
+                    .setCountryCode("ZN")
+                    .setApplicationUri("urn:dc3:opc:ua:client")
+                    .addDnsName("localhost")
+                    .addIpAddress("127.0.0.1");
+
+            // Get as many hostnames and IP addresses as we can listed in the certificate.
+            for (String hostname : HostUtil.getHostNames("0.0.0.0")) {
+                if (IP_ADDR_PATTERN.matcher(hostname).matches()) {
+                    builder.addIpAddress(hostname);
+                } else {
+                    builder.addDnsName(hostname);
+                }
+            }
+
+            X509Certificate certificate = builder.build();
+            keyStore.setKeyEntry(CLIENT_ALIAS, keyPair.getPrivate(), PASSWORD, new X509Certificate[]{certificate});
+            try (OutputStream out = Files.newOutputStream(serverKeyStore)) {
+                keyStore.store(out, PASSWORD);
+            }
+        } else {
+            try (InputStream in = Files.newInputStream(serverKeyStore)) {
+                keyStore.load(in, PASSWORD);
+            }
+        }
+
+        Key serverPrivateKey = keyStore.getKey(CLIENT_ALIAS, PASSWORD);
+        if (serverPrivateKey instanceof PrivateKey) {
+            clientCertificate = (X509Certificate) keyStore.getCertificate(CLIENT_ALIAS);
+            PublicKey serverPublicKey = clientCertificate.getPublicKey();
+            clientKeyPair = new KeyPair(serverPublicKey, (PrivateKey) serverPrivateKey);
+        }
+
+        return this;
+    }
+
+}

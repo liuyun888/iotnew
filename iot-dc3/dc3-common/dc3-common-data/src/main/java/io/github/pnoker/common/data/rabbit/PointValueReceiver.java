@@ -1,0 +1,85 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package io.github.pnoker.common.data.rabbit;
+
+import com.rabbitmq.client.Channel;
+import io.github.pnoker.common.data.biz.PointValueService;
+import io.github.pnoker.common.data.job.PointValueJob;
+import io.github.pnoker.common.entity.bo.PointValueBO;
+import io.github.pnoker.common.utils.JsonUtil;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+
+/**
+ * 接收驱动发送过来的数据
+ * <p>
+ * 200万条SinglePointValue会产生: 60M的索引数据以及400M的数据
+ *
+ * @author pnoker
+ * @version 2025.9.0
+ * @since 2022.1.0
+ */
+@Slf4j
+@Component
+public class PointValueReceiver {
+
+    @Value("${data.point.batch.speed}")
+    private Integer batchSpeed;
+
+    @Resource
+    private ExecutorService virtualThreadExecutor;
+    @Resource
+    private PointValueService pointValueService;
+
+    @RabbitHandler
+    @RabbitListener(queues = "#{pointValueQueue.name}")
+    public void pointValueReceive(Channel channel, Message message, PointValueBO pointValueBO) {
+        try {
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), true);
+            if (Objects.isNull(pointValueBO) || Objects.isNull(pointValueBO.getDeviceId())) {
+                log.error("Invalid point value: {}", pointValueBO);
+                return;
+            }
+            PointValueJob.VALUE_COUNT.getAndIncrement();
+            log.debug("Receive point value from: {}, {}", message.getMessageProperties().getReceivedRoutingKey(), JsonUtil.toJsonString(pointValueBO));
+
+            // Judge whether to process data in batch according to the data transmission speed
+            if (PointValueJob.VALUE_SPEED.get() < batchSpeed) {
+                virtualThreadExecutor.execute(() ->
+                        // Save point value to Redis & PostgreSQL
+                        pointValueService.save(pointValueBO)
+                );
+            } else {
+                // Save point value to schedule
+                PointValueJob.VALUE_LOCK.writeLock().lock();
+                PointValueJob.addPointValues(pointValueBO);
+                PointValueJob.VALUE_LOCK.writeLock().unlock();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+}

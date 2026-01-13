@@ -1,0 +1,156 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package io.github.pnoker.common.manager.controller;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.github.pnoker.common.base.BaseController;
+import io.github.pnoker.common.constant.service.ManagerConstant;
+import io.github.pnoker.common.dal.entity.bo.GroupBO;
+import io.github.pnoker.common.dal.entity.builder.GroupBuilder;
+import io.github.pnoker.common.dal.entity.query.GroupQuery;
+import io.github.pnoker.common.dal.entity.vo.GroupVO;
+import io.github.pnoker.common.dal.service.GroupService;
+import io.github.pnoker.common.entity.R;
+import io.github.pnoker.common.enums.ResponseEnum;
+import io.github.pnoker.common.valid.Add;
+import io.github.pnoker.common.valid.Update;
+import jakarta.validation.constraints.NotNull;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+
+import java.util.Objects;
+
+/**
+ * 分组 Controller
+ *
+ * @author pnoker
+ * @version 2025.9.0
+ * @since 2022.1.0
+ */
+@Slf4j
+@RestController
+@RequestMapping(ManagerConstant.GROUP_URL_PREFIX)
+public class GroupController implements BaseController {
+
+    private final GroupBuilder groupBuilder;
+    private final GroupService groupService;
+
+    public GroupController(GroupBuilder groupBuilder, GroupService groupService) {
+        this.groupBuilder = groupBuilder;
+        this.groupService = groupService;
+    }
+
+    /**
+     * 新增
+     *
+     * @param entityVO {@link GroupVO}
+     * @return R of String
+     */
+    @PostMapping("/add")
+    public Mono<R<String>> add(@Validated(Add.class) @RequestBody GroupVO entityVO) {
+        return getTenantId().flatMap(tenantId -> {
+            try {
+                GroupBO entityBO = groupBuilder.buildBOByVO(entityVO);
+                entityBO.setTenantId(tenantId);
+                groupService.save(entityBO);
+                return Mono.just(R.ok(ResponseEnum.ADD_SUCCESS));
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                return Mono.just(R.fail(e.getMessage()));
+            }
+        });
+    }
+
+    /**
+     * 删除
+     *
+     * @param id ID
+     * @return R of String
+     */
+    @PostMapping("/delete/{id}")
+    public Mono<R<String>> delete(@NotNull @PathVariable(value = "id") Long id) {
+        try {
+            groupService.remove(id);
+            return Mono.just(R.ok(ResponseEnum.DELETE_SUCCESS));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return Mono.just(R.fail(e.getMessage()));
+        }
+    }
+
+    /**
+     * 更新
+     *
+     * @param entityVO {@link GroupVO}
+     * @return R of String
+     */
+    @PostMapping("/update")
+    public Mono<R<String>> update(@Validated(Update.class) @RequestBody GroupVO entityVO) {
+        try {
+            GroupBO entityBO = groupBuilder.buildBOByVO(entityVO);
+            groupService.update(entityBO);
+            return Mono.just(R.ok(ResponseEnum.UPDATE_SUCCESS));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return Mono.just(R.fail(e.getMessage()));
+        }
+    }
+
+    /**
+     * 单个查询
+     *
+     * @param id ID
+     * @return GroupVO {@link GroupVO}
+     */
+    @GetMapping("/id/{id}")
+    public Mono<R<GroupVO>> selectById(@NotNull @PathVariable(value = "id") Long id) {
+        try {
+            GroupBO entityBO = groupService.selectById(id);
+            GroupVO entityVO = groupBuilder.buildVOByBO(entityBO);
+            return Mono.just(R.ok(entityVO));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return Mono.just(R.fail(e.getMessage()));
+        }
+    }
+
+    /**
+     * 分页查询
+     *
+     * @param entityQuery {@link GroupQuery}
+     * @return R Of GroupVO Page
+     */
+    @PostMapping("/list")
+    public Mono<R<Page<GroupVO>>> list(@RequestBody(required = false) GroupQuery entityQuery) {
+        return getTenantId().flatMap(tenantId -> {
+            try {
+                GroupQuery query = Objects.isNull(entityQuery) ? new GroupQuery() : entityQuery;
+                query.setTenantId(tenantId);
+                Page<GroupBO> entityPageBO = groupService.selectByPage(query);
+                Page<GroupVO> entityPageVO = groupBuilder.buildVOPageByBOPage(entityPageBO);
+                return Mono.just(R.ok(entityPageVO));
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                return Mono.just(R.fail(e.getMessage()));
+            }
+        });
+    }
+
+}

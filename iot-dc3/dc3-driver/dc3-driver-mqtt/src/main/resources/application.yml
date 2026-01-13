@@ -1,0 +1,53 @@
+#
+# Copyright 2016-present the IoT DC3 original author or authors.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+driver:
+  tenant: default
+  name: Mqtt驱动
+  code: MqttDriver
+  type: DRIVER_SERVER
+  remark: @project.description@
+  schedule:
+    # 定时读数据
+    read:
+      enable: false
+      cron: '0/30 * * * * ?'
+    custom:
+      enable: true
+      cron: '0/5 * * * * ?'
+  point-attribute:
+    - attribute-name: 指令Topic
+      attribute-code: commandTopic
+      attribute-type-flag: STRING
+      default-value: commandTopic
+      remark: 测点/设备接收下行指令的Mqtt主题
+    - attribute-name: 指令Qos
+      attribute-code: commandQos
+      attribute-type-flag: INT
+      default-value: 2
+      remark: 测点/设备接收下行指令的Mqtt主题的Qos
+
+spring:
+  application:
+    name: @project.artifactId@
+  profiles:
+    active:
+      - ${NODE_ENV:dev}
+
+logging:
+  file:
+    name: dc3/logs/driver/mqtt/${spring.application.name}.log

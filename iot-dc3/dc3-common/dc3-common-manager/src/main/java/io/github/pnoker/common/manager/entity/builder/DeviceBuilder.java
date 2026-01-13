@@ -1,0 +1,194 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package io.github.pnoker.common.manager.entity.builder;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.github.pnoker.common.entity.ext.DeviceExt;
+import io.github.pnoker.common.entity.ext.JsonExt;
+import io.github.pnoker.common.enums.EnableFlagEnum;
+import io.github.pnoker.common.manager.entity.bo.DeviceBO;
+import io.github.pnoker.common.manager.entity.bo.DeviceByPointBO;
+import io.github.pnoker.common.manager.entity.model.DeviceDO;
+import io.github.pnoker.common.manager.entity.vo.DeviceByPointVO;
+import io.github.pnoker.common.manager.entity.vo.DeviceVO;
+import io.github.pnoker.common.utils.CodeUtil;
+import io.github.pnoker.common.utils.JsonUtil;
+import io.github.pnoker.common.utils.MapStructUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ * 设备 Builder
+ *
+ * @author pnoker
+ * @version 2025.9.0
+ * @since 2022.1.0
+ */
+@Mapper(componentModel = "spring", uses = {MapStructUtil.class})
+public interface DeviceBuilder {
+
+    /**
+     * VO to BO
+     *
+     * @param entityVO EntityVO
+     * @return EntityBO
+     */
+    @Mapping(target = "tenantId", ignore = true)
+    DeviceBO buildBOByVO(DeviceVO entityVO);
+
+    /**
+     * VOList to BOList
+     *
+     * @param entityVOList EntityVO Array
+     * @return EntityBO Array
+     */
+    List<DeviceBO> buildBOListByVOList(List<DeviceVO> entityVOList);
+
+    /**
+     * BO to DO
+     *
+     * @param entityBO EntityBO
+     * @return EntityDO
+     */
+    @Mapping(target = "deviceExt", ignore = true)
+    @Mapping(target = "enableFlag", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    DeviceDO buildDOByBO(DeviceBO entityBO);
+
+    @AfterMapping
+    default void afterProcess(DeviceBO entityBO, @MappingTarget DeviceDO entityDO) {
+        // Code
+        if (StringUtils.isEmpty(entityBO.getDeviceCode())) {
+            entityDO.setDeviceCode(CodeUtil.getCode());
+        }
+
+// Json Ext
+        DeviceExt entityExt = entityBO.getDeviceExt();
+        JsonExt ext = new JsonExt();
+        if (Objects.nonNull(entityExt)) {
+            ext.setType(entityExt.getType());
+            ext.setVersion(entityExt.getVersion());
+            ext.setRemark(entityExt.getRemark());
+            ext.setContent(JsonUtil.toJsonString(entityExt.getContent()));
+        }
+        entityDO.setDeviceExt(ext);
+
+        // Enable Flag
+        EnableFlagEnum enableFlag = entityBO.getEnableFlag();
+        Optional.ofNullable(enableFlag).ifPresent(value -> entityDO.setEnableFlag(value.getIndex()));
+    }
+
+    /**
+     * BOList to DOList
+     *
+     * @param entityBOList EntityBO Array
+     * @return EntityDO Array
+     */
+    List<DeviceDO> buildDOListByBOList(List<DeviceBO> entityBOList);
+
+    /**
+     * DO to BO
+     *
+     * @param entityDO EntityDO
+     * @return EntityBO
+     */
+    @Mapping(target = "deviceExt", ignore = true)
+    @Mapping(target = "profileIds", ignore = true)
+    @Mapping(target = "enableFlag", ignore = true)
+    DeviceBO buildBOByDO(DeviceDO entityDO);
+
+    @AfterMapping
+    default void afterProcess(DeviceDO entityDO, @MappingTarget DeviceBO entityBO) {
+        // Json Ext
+        JsonExt entityExt = entityDO.getDeviceExt();
+        if (Objects.nonNull(entityExt)) {
+            DeviceExt ext = new DeviceExt();
+            ext.setType(entityExt.getType());
+            ext.setVersion(entityExt.getVersion());
+            ext.setRemark(entityExt.getRemark());
+            ext.setContent(JsonUtil.parseObject(entityExt.getContent(), DeviceExt.Content.class));
+            entityBO.setDeviceExt(ext);
+        }
+
+        // Enable Flag
+        Byte enableFlag = entityDO.getEnableFlag();
+        entityBO.setEnableFlag(EnableFlagEnum.ofIndex(enableFlag));
+    }
+
+    /**
+     * DOList to BOList
+     *
+     * @param entityDOList EntityDO Array
+     * @return EntityBO Array
+     */
+    List<DeviceBO> buildBOListByDOList(List<DeviceDO> entityDOList);
+
+    /**
+     * BO to VO
+     *
+     * @param entityBO EntityBO
+     * @return EntityVO
+     */
+    DeviceVO buildVOByBO(DeviceBO entityBO);
+
+    /**
+     * BOList to VOList
+     *
+     * @param entityBOList EntityBO Array
+     * @return EntityVO Array
+     */
+    List<DeviceVO> buildVOListByBOList(List<DeviceBO> entityBOList);
+
+    /**
+     * DOPage to BOPage
+     *
+     * @param entityPageDO EntityDO Page
+     * @return EntityBO Page
+     */
+    @Mapping(target = "orders", ignore = true)
+    @Mapping(target = "countId", ignore = true)
+    @Mapping(target = "maxLimit", ignore = true)
+    @Mapping(target = "searchCount", ignore = true)
+    @Mapping(target = "optimizeCountSql", ignore = true)
+    @Mapping(target = "optimizeJoinOfCountSql", ignore = true)
+    Page<DeviceBO> buildBOPageByDOPage(Page<DeviceDO> entityPageDO);
+
+    /**
+     * BOPage to VOPage
+     *
+     * @param entityPageBO EntityBO Page
+     * @return EntityVO Page
+     */
+    @Mapping(target = "orders", ignore = true)
+    @Mapping(target = "countId", ignore = true)
+    @Mapping(target = "maxLimit", ignore = true)
+    @Mapping(target = "searchCount", ignore = true)
+    @Mapping(target = "optimizeCountSql", ignore = true)
+    @Mapping(target = "optimizeJoinOfCountSql", ignore = true)
+    Page<DeviceVO> buildVOPageByBOPage(Page<DeviceBO> entityPageBO);
+
+
+    DeviceByPointVO buildVOPointByBO(DeviceByPointBO deviceByPointBO);
+}

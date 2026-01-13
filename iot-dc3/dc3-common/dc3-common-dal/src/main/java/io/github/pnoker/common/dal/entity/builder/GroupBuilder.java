@@ -1,0 +1,171 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package io.github.pnoker.common.dal.entity.builder;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.github.pnoker.common.dal.entity.bo.GroupBO;
+import io.github.pnoker.common.dal.entity.model.GroupDO;
+import io.github.pnoker.common.dal.entity.vo.GroupVO;
+import io.github.pnoker.common.enums.EnableFlagEnum;
+import io.github.pnoker.common.enums.GroupTypeFlagEnum;
+import io.github.pnoker.common.utils.CodeUtil;
+import io.github.pnoker.common.utils.MapStructUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Group Builder
+ *
+ * @author pnoker
+ * @version 2025.9.0
+ * @since 2022.1.0
+ */
+@Mapper(componentModel = "spring", uses = {MapStructUtil.class})
+public interface GroupBuilder {
+
+    /**
+     * VO to BO
+     *
+     * @param entityVO EntityVO
+     * @return EntityBO
+     */
+    @Mapping(target = "tenantId", ignore = true)
+    GroupBO buildBOByVO(GroupVO entityVO);
+
+    /**
+     * VOList to BOList
+     *
+     * @param entityVOList EntityVO 集合
+     * @return EntityBO 集合
+     */
+    List<GroupBO> buildBOListByVOList(List<GroupVO> entityVOList);
+
+    /**
+     * BO to VO
+     *
+     * @param entityBO EntityBO
+     * @return EntityVO
+     */
+    GroupVO buildVOByBO(GroupBO entityBO);
+
+    /**
+     * BOList to VOList
+     *
+     * @param entityBOList EntityBO 集合
+     * @return EntityVO 集合
+     */
+    List<GroupVO> buildVOListByBOList(List<GroupBO> entityBOList);
+
+    /**
+     * DO to BO
+     *
+     * @param entityDO EntityDO
+     * @return EntityBO
+     */
+    @Mapping(target = "groupTypeFlag", ignore = true)
+    @Mapping(target = "enableFlag", ignore = true)
+    GroupBO buildBOByDO(GroupDO entityDO);
+
+    @AfterMapping
+    default void afterProcess(GroupDO entityDO, @MappingTarget GroupBO entityBO) {
+        // GroupType Flag
+        Byte groupTypeFlag = entityDO.getGroupTypeFlag();
+        entityBO.setGroupTypeFlag(GroupTypeFlagEnum.ofIndex(groupTypeFlag));
+
+        // Enable Flag
+        Byte enableFlag = entityDO.getEnableFlag();
+        entityBO.setEnableFlag(EnableFlagEnum.ofIndex(enableFlag));
+    }
+
+    /**
+     * DOList to BOList
+     *
+     * @param entityDOList EntityDO Array
+     * @return EntityBO Array
+     */
+    List<GroupBO> buildBOListByDOList(List<GroupDO> entityDOList);
+
+    /**
+     * BO to DO
+     *
+     * @param entityBO EntityBO
+     * @return EntityDO
+     */
+    @Mapping(target = "groupTypeFlag", ignore = true)
+    @Mapping(target = "enableFlag", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    GroupDO buildDOByBO(GroupBO entityBO);
+
+    @AfterMapping
+    default void afterProcess(GroupBO entityBO, @MappingTarget GroupDO entityDO) {
+        // Code
+        if (StringUtils.isEmpty(entityBO.getGroupCode())) {
+            entityDO.setGroupCode(CodeUtil.getCode());
+        }
+
+// GroupType Flag
+        GroupTypeFlagEnum groupTypeFlag = entityBO.getGroupTypeFlag();
+        Optional.ofNullable(groupTypeFlag).ifPresent(value -> entityDO.setGroupTypeFlag(value.getIndex()));
+
+        // Enable Flag
+        EnableFlagEnum enableFlag = entityBO.getEnableFlag();
+        Optional.ofNullable(enableFlag).ifPresent(value -> entityDO.setEnableFlag(value.getIndex()));
+    }
+
+    /**
+     * BOList to DOList
+     *
+     * @param entityBOList EntityBO Array
+     * @return EntityDO Array
+     */
+    List<GroupDO> buildDOListByBOList(List<GroupBO> entityBOList);
+
+    /**
+     * BOPage to VOPage
+     *
+     * @param entityPageBO EntityBO Page
+     * @return EntityVO Page
+     */
+    @Mapping(target = "orders", ignore = true)
+    @Mapping(target = "countId", ignore = true)
+    @Mapping(target = "maxLimit", ignore = true)
+    @Mapping(target = "searchCount", ignore = true)
+    @Mapping(target = "optimizeCountSql", ignore = true)
+    @Mapping(target = "optimizeJoinOfCountSql", ignore = true)
+    Page<GroupVO> buildVOPageByBOPage(Page<GroupBO> entityPageBO);
+
+    /**
+     * DOPage to BOPage
+     *
+     * @param entityPageDO EntityDO Page
+     * @return EntityBO Page
+     */
+    @Mapping(target = "orders", ignore = true)
+    @Mapping(target = "countId", ignore = true)
+    @Mapping(target = "maxLimit", ignore = true)
+    @Mapping(target = "searchCount", ignore = true)
+    @Mapping(target = "optimizeCountSql", ignore = true)
+    @Mapping(target = "optimizeJoinOfCountSql", ignore = true)
+    Page<GroupBO> buildBOPageByDOPage(Page<GroupDO> entityPageDO);
+}

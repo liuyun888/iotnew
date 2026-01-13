@@ -1,0 +1,69 @@
+#
+# Copyright 2016-present the IoT DC3 original author or authors.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+driver:
+  tenant: default
+  name: Modbus-Tcp驱动
+  code: ModbusTcpDriver
+  type: DRIVER_CLIENT
+  remark: @project.description@
+  schedule:
+    # 定时读数据
+    read:
+      enable: true
+      cron: '0/30 * * * * ?'
+    custom:
+      enable: true
+      cron: '0/5 * * * * ?'
+  driver-attribute:
+    - attribute-name: 主机
+      attribute-code: host
+      attribute-type-flag: STRING
+      default-value: localhost
+      remark: Modbus IP
+    - attribute-name: 端口
+      attribute-code: port
+      attribute-type-flag: INT
+      default-value: 502
+      remark: Modbus Port
+  point-attribute:
+    - attribute-name: 从站编号
+      attribute-code: slaveId
+      attribute-type-flag: INT
+      default-value: 1
+      remark: 从站编号
+    - attribute-name: 功能码
+      attribute-code: functionCode
+      attribute-type-flag: INT
+      default-value: 1
+      remark: 功能码 [1, 2, 3, 4]
+    - attribute-name: 偏移量
+      attribute-code: offset
+      attribute-type-flag: INT
+      default-value: 0
+      remark: 偏移量
+
+spring:
+  application:
+    name: @project.artifactId@
+  profiles:
+    active:
+      - ${NODE_ENV:dev}
+
+logging:
+  file:
+    name: dc3/logs/driver/modbus-tcp/${spring.application.name}.log

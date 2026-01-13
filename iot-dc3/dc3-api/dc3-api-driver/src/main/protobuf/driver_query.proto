@@ -1,0 +1,82 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+syntax = "proto3";
+
+package api.common.driver;
+
+/*
+Config
+*/
+option java_package = "io.github.pnoker.api.common.driver";
+option java_outer_classname = "QueryProto";
+option objc_class_prefix = "Driver";
+option java_multiple_files = true;
+
+/*
+Device Query
+在驱动中获取设备信息仅需要限制该设备是否属于该驱动即可
+驱动查询结构体，用于查询驱动相关信息
+*/
+message GrpcDriverQuery {
+  /*
+  驱动ID
+  标识具体的驱动实例
+  */
+  int64 driver_id = 1;
+}
+
+/*
+Device Query
+在驱动中获取设备信息仅需要限制该设备是否属于该驱动即可
+设备查询结构体，用于查询设备相关信息
+*/
+message GrpcDeviceQuery {
+  /*
+  驱动ID
+  标识设备所属的驱动
+  */
+  int64 driver_id = 1;
+
+  /*
+  Device ID
+  设备ID，标识具体设备
+  */
+  int64 device_id = 2;
+}
+
+/*
+Point Query
+在驱动中获取位号信息仅需要限制该位号是否属于该驱动即可
+点位查询结构体，用于查询点位相关信息
+*/
+message GrpcPointQuery {
+  /*
+  驱动ID
+  标识点位所属的驱动
+  */
+  int64 driver_id = 1;
+
+  /*
+  Point ID
+  点位ID，标识具体点位
+  */
+  int64 point_id = 2;
+}
+
+
+

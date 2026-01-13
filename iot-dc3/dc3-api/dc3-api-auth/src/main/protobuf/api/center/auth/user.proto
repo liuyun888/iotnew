@@ -1,0 +1,79 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+syntax = "proto3";
+
+package api.common.auth;
+
+import "api/common/base.proto";
+import "api/common/r.proto";
+
+/*
+Config
+*/
+option java_package = "io.github.pnoker.api.center.auth";
+option java_outer_classname = "UserProto";
+option objc_class_prefix = "Auth";
+option java_multiple_files = true;
+
+/*
+Api
+服务接口，定义了用户相关的RPC调用
+*/
+service UserApi {
+  // 通过用户ID查询用户信息
+  rpc SelectById (GrpcIdQuery) returns (GrpcRUserDTO);
+}
+
+// selectById Query
+// 查询用户ID的请求结构体
+message GrpcIdQuery {
+  int64 id = 1; // 用户ID，唯一标识一个用户
+}
+
+// R of User DTO
+// 返回用户信息的响应结构体
+message GrpcRUserDTO {
+  /*
+  R
+  通用返回结果，包含状态码、消息等
+  */
+  GrpcR result = 1;
+
+  /*
+  Data
+  返回的用户数据
+  */
+  GrpcUserDTO data = 2;
+}
+
+// User DTO
+// 用户数据结构体，包含用户的基本信息
+message GrpcUserDTO {
+  /*
+  Base
+  通用基础字段（如ID、创建时间等）
+  */
+  GrpcBase base = 1;
+
+  string nick_name = 2; // 用户昵称
+  string user_name = 3; // 用户名
+  string phone = 4; // 手机号
+  string email = 5; // 邮箱
+  string social_ext = 6; // 社交相关扩展信息，加密存储
+  string identity_ext = 7; // 身份相关扩展信息，加密存储
+}

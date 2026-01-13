@@ -1,0 +1,168 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package io.github.pnoker.common.data.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.github.pnoker.common.constant.common.QueryWrapperConstant;
+import io.github.pnoker.common.data.dal.MessageManager;
+import io.github.pnoker.common.data.entity.bo.MessageBO;
+import io.github.pnoker.common.data.entity.builder.MessageBuilder;
+import io.github.pnoker.common.data.entity.model.MessageDO;
+import io.github.pnoker.common.data.entity.query.MessageQuery;
+import io.github.pnoker.common.data.service.MessageService;
+import io.github.pnoker.common.entity.common.Pages;
+import io.github.pnoker.common.exception.*;
+import io.github.pnoker.common.utils.PageUtil;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+
+/**
+ * <p>
+ * AlarmMessageProfile Service Impl
+ * </p>
+ *
+ * @author pnoker
+ * @version 2025.9.0
+ * @since 2022.1.0
+ */
+@Slf4j
+@Service
+public class MessageServiceImpl implements MessageService {
+
+    @Resource
+    private MessageBuilder messageBuilder;
+
+    @Resource
+    private MessageManager messageManager;
+
+    @Override
+    public void save(MessageBO entityBO) {
+        checkDuplicate(entityBO, false, true);
+
+        MessageDO entityDO = messageBuilder.buildDOByBO(entityBO);
+        if (!messageManager.save(entityDO)) {
+            throw new AddException("Failed to create group");
+        }
+    }
+
+    @Override
+    public void remove(Long id) {
+        getDOById(id, true);
+
+        // 删除分组之前需要检查该分组是否存在关联
+        LambdaQueryChainWrapper<MessageDO> wrapper = messageManager.lambdaQuery()
+                .eq(MessageDO::getTenantId, id);
+        long count = wrapper.count();
+        if (count > 0) {
+            throw new AssociatedException("Failed to remove group: there are subgroups under the group");
+        }
+
+        if (!messageManager.removeById(id)) {
+            throw new DeleteException("Failed to remove group");
+        }
+    }
+
+    @Override
+    public void update(MessageBO entityBO) {
+        getDOById(entityBO.getId(), true);
+
+        checkDuplicate(entityBO, true, true);
+
+        MessageDO entityDO = messageBuilder.buildDOByBO(entityBO);
+        entityDO.setOperateTime(null);
+        if (!messageManager.updateById(entityDO)) {
+            throw new UpdateException("Failed to update group");
+        }
+    }
+
+    @Override
+    public MessageBO selectById(Long id) {
+        MessageDO entityDO = getDOById(id, true);
+        return messageBuilder.buildBOByDO(entityDO);
+    }
+
+    @Override
+    public Page<MessageBO> selectByPage(MessageQuery entityQuery) {
+        if (Objects.isNull(entityQuery.getPage())) {
+            entityQuery.setPage(new Pages());
+        }
+        Page<MessageDO> entityPageDO = messageManager.page(PageUtil.page(entityQuery.getPage()), fuzzyQuery(entityQuery));
+        return messageBuilder.buildBOPageByDOPage(entityPageDO);
+    }
+
+    /**
+     * 构造模糊查询
+     *
+     * @param entityQuery {@link MessageQuery}
+     * @return {@link LambdaQueryWrapper}
+     */
+    private LambdaQueryWrapper<MessageDO> fuzzyQuery(MessageQuery entityQuery) {
+        LambdaQueryWrapper<MessageDO> wrapper = Wrappers.<MessageDO>query().lambda();
+        wrapper.like(StringUtils.isNotEmpty(entityQuery.getAlarmMessageTitle()), MessageDO::getMessageName, entityQuery.getAlarmMessageTitle());
+        wrapper.eq(MessageDO::getTenantId, entityQuery.getTenantId());
+        return wrapper;
+    }
+
+    /**
+     * 重复性校验
+     *
+     * @param entityBO       {@link MessageBO}
+     * @param isUpdate       是否为更新操作
+     * @param throwException 如果重复是否抛异常
+     * @return 是否重复
+     */
+    private boolean checkDuplicate(MessageBO entityBO, boolean isUpdate, boolean throwException) {
+        LambdaQueryWrapper<MessageDO> wrapper = Wrappers.<MessageDO>query().lambda();
+        wrapper.eq(MessageDO::getMessageName, entityBO.getMessageName());
+        wrapper.eq(MessageDO::getMessageCode, entityBO.getMessageCode());
+        wrapper.eq(MessageDO::getTenantId, entityBO.getTenantId());
+        wrapper.last(QueryWrapperConstant.LIMIT_ONE);
+        MessageDO one = messageManager.getOne(wrapper);
+        if (Objects.isNull(one)) {
+            return false;
+        }
+        boolean duplicate = !isUpdate || !one.getId().equals(entityBO.getId());
+        if (throwException && duplicate) {
+            throw new DuplicateException("Alarm message profile has been duplicated");
+        }
+        return duplicate;
+    }
+
+    /**
+     * 根据 主键ID 获取
+     *
+     * @param id             ID
+     * @param throwException 是否抛异常
+     * @return {@link MessageDO}
+     */
+    private MessageDO getDOById(Long id, boolean throwException) {
+        MessageDO entityDO = messageManager.getById(id);
+        if (throwException && Objects.isNull(entityDO)) {
+            throw new NotFoundException("Alarm message profile does not exist");
+        }
+        return entityDO;
+    }
+
+}

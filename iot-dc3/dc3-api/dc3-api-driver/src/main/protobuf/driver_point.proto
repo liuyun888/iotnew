@@ -1,0 +1,99 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+syntax = "proto3";
+
+package api.common.driver;
+
+import "api/common/page.proto";
+import "api/common/r.proto";
+import "api/common/entity.proto";
+import "driver_query.proto";
+import "driver_query_page.proto";
+
+/*
+Config
+*/
+option java_package = "io.github.pnoker.api.common.driver";
+option java_outer_classname = "PointProto";
+option objc_class_prefix = "Driver";
+option java_multiple_files = true;
+
+/*
+Api
+服务接口，定义了驱动点位相关的RPC调用
+*/
+service PointApi {
+  // 分页查询点位信息
+  rpc SelectByPage (GrpcPagePointQuery) returns (GrpcRPagePointDTO);
+  // 根据点位ID查询点位信息
+  rpc SelectById (GrpcPointQuery) returns (GrpcRPointDTO);
+}
+
+/*
+Point R Page
+点位分页查询的响应结构体
+*/
+message GrpcRPagePointDTO {
+  /*
+  R
+  通用返回结果，包含状态码、消息等
+  */
+  GrpcR result = 1;
+
+  /*
+  Data
+  返回的分页点位数据
+  */
+  GrpcPagePointDTO data = 2;
+}
+
+/*
+Point Page
+点位分页数据结构体
+*/
+message GrpcPagePointDTO {
+  /*
+  Page
+  分页信息，包含页码、页大小、总数等
+  */
+  GrpcPage page = 1;
+
+  /*
+  Data
+  点位数据列表
+  */
+  repeated GrpcPointDTO data = 2;
+}
+
+/*
+Point
+单个点位查询的响应结构体
+*/
+message GrpcRPointDTO {
+  /*
+  R
+  通用返回结果，包含状态码、消息等
+  */
+  GrpcR result = 1;
+
+  /*
+  Data
+  返回的单个点位数据
+  */
+  GrpcPointDTO data = 2;
+}

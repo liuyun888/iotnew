@@ -1,0 +1,243 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package io.github.pnoker.common.auth.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.github.pnoker.common.auth.dal.UserManager;
+import io.github.pnoker.common.auth.entity.bo.UserBO;
+import io.github.pnoker.common.auth.entity.builder.UserBuilder;
+import io.github.pnoker.common.auth.entity.model.UserDO;
+import io.github.pnoker.common.auth.entity.query.UserQuery;
+import io.github.pnoker.common.auth.service.UserService;
+import io.github.pnoker.common.constant.common.QueryWrapperConstant;
+import io.github.pnoker.common.entity.common.Pages;
+import io.github.pnoker.common.exception.*;
+import io.github.pnoker.common.utils.PageUtil;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+
+/**
+ * 用户服务接口实现类
+ *
+ * @author pnoker
+ * @version 2025.9.0
+ * @since 2022.1.0
+ */
+@Slf4j
+@Service
+public class UserServiceImpl implements UserService {
+
+    @Resource
+    private UserBuilder userBuilder;
+
+    @Resource
+    private UserManager userManager;
+
+    @Override
+    public void save(UserBO entityBO) {
+        checkDuplicate(entityBO, false, true);
+
+        // 判断手机号是否存在, 如果有手机号不为空, 检查该手机号是否被占用
+        if (StringUtils.isNotEmpty(entityBO.getPhone())) {
+            UserBO selectByPhone = selectByPhone(entityBO.getPhone(), false);
+            if (Objects.nonNull(selectByPhone)) {
+                throw new DuplicateException("The user already exists with phone: {}", entityBO.getPhone());
+            }
+        }
+
+        // 判断邮箱是否存在, 如果有邮箱不为空, 检查该邮箱是否被占用
+        if (StringUtils.isNotEmpty(entityBO.getEmail())) {
+            UserBO selectByEmail = selectByEmail(entityBO.getEmail(), false);
+            if (Objects.nonNull(selectByEmail)) {
+                throw new DuplicateException("The user already exists with email: {}", entityBO.getEmail());
+            }
+        }
+
+        UserDO entityDO = userBuilder.buildDOByBO(entityBO);
+        if (!userManager.save(entityDO)) {
+            throw new AddException("Failed to create user: {}", entityBO.toString());
+        }
+    }
+
+    @Override
+    public void remove(Long id) {
+        getDOById(id, true);
+
+        if (!userManager.removeById(id)) {
+            throw new DeleteException("Failed to remove user");
+        }
+    }
+
+    @Override
+    public void update(UserBO entityBO) {
+        UserDO selectById = getDOById(entityBO.getId(), true);
+
+        checkDuplicate(entityBO, true, true);
+
+        // 判断手机号是否更新
+        if (StringUtils.isNotEmpty(entityBO.getPhone())) {
+            if (!entityBO.getPhone().equals(selectById.getPhone())) {
+                UserBO selectByPhone = selectByPhone(entityBO.getPhone(), false);
+                if (Objects.nonNull(selectByPhone)) {
+                    throw new DuplicateException("The user already exists with phone {}", entityBO.getPhone());
+                }
+            }
+        }
+
+        // 判断邮箱是否更新
+        if (StringUtils.isNotEmpty(entityBO.getEmail())) {
+            if (!entityBO.getEmail().equals(selectById.getEmail())) {
+                UserBO selectByEmail = selectByEmail(entityBO.getEmail(), false);
+                if (Objects.nonNull(selectByEmail)) {
+                    throw new DuplicateException("The user already exists with email {}", entityBO.getEmail());
+                }
+            }
+        }
+
+        UserDO entityDO = userBuilder.buildDOByBO(entityBO);
+        entityDO.setOperateTime(null);
+        if (!userManager.updateById(entityDO)) {
+            throw new UpdateException("The user update failed");
+        }
+    }
+
+    @Override
+    public UserBO selectById(Long id) {
+        UserDO entityDO = getDOById(id, true);
+        return userBuilder.buildBOByDO(entityDO);
+    }
+
+    public UserBO selectByUserName(String userName, boolean throwException) {
+        if (StringUtils.isEmpty(userName)) {
+            if (throwException) {
+                throw new EmptyException("The name is empty");
+            }
+            return null;
+        }
+
+        return selectByKey(UserDO::getUserName, userName, throwException);
+    }
+
+    @Override
+    public UserBO selectByPhone(String phone, boolean throwException) {
+        if (StringUtils.isEmpty(phone)) {
+            if (throwException) {
+                throw new EmptyException("The phone is empty");
+            }
+            return null;
+        }
+
+        return selectByKey(UserDO::getPhone, phone, throwException);
+    }
+
+    @Override
+    public UserBO selectByEmail(String email, boolean throwException) {
+        if (StringUtils.isEmpty(email)) {
+            if (throwException) {
+                throw new EmptyException("The phone is empty");
+            }
+            return null;
+        }
+
+        return selectByKey(UserDO::getEmail, email, throwException);
+    }
+
+    @Override
+    public Page<UserBO> selectByPage(UserQuery entityQuery) {
+        if (Objects.isNull(entityQuery.getPage())) {
+            entityQuery.setPage(new Pages());
+        }
+        Page<UserDO> page = userManager.page(PageUtil.page(entityQuery.getPage()), fuzzyQuery(entityQuery));
+        return userBuilder.buildBOPageByDOPage(page);
+    }
+
+    /**
+     * 构造模糊查询
+     *
+     * @param entityQuery {@link UserQuery}
+     * @return {@link LambdaQueryWrapper}
+     */
+    private LambdaQueryWrapper<UserDO> fuzzyQuery(UserQuery entityQuery) {
+        LambdaQueryWrapper<UserDO> wrapper = Wrappers.<UserDO>query().lambda();
+        wrapper.like(StringUtils.isNotEmpty(entityQuery.getNickName()), UserDO::getNickName, entityQuery.getNickName());
+        wrapper.like(StringUtils.isNotEmpty(entityQuery.getUserName()), UserDO::getUserName, entityQuery.getUserName());
+        wrapper.like(StringUtils.isNotEmpty(entityQuery.getPhone()), UserDO::getPhone, entityQuery.getPhone());
+        wrapper.like(StringUtils.isNotEmpty(entityQuery.getEmail()), UserDO::getEmail, entityQuery.getEmail());
+        return wrapper;
+    }
+
+    private UserBO selectByKey(SFunction<UserDO, ?> key, String value, boolean throwException) {
+        LambdaQueryWrapper<UserDO> wrapper = Wrappers.<UserDO>query().lambda();
+        wrapper.eq(key, value);
+        wrapper.last(QueryWrapperConstant.LIMIT_ONE);
+        UserDO userDO = userManager.getOne(wrapper);
+        if (Objects.isNull(userDO)) {
+            if (throwException) {
+                throw new NotFoundException();
+            }
+            return null;
+        }
+        return userBuilder.buildBOByDO(userDO);
+    }
+
+    /**
+     * 重复性校验
+     *
+     * @param entityBO       {@link UserBO}
+     * @param isUpdate       是否为更新操作
+     * @param throwException 如果重复是否抛异常
+     * @return 是否重复
+     */
+    private boolean checkDuplicate(UserBO entityBO, boolean isUpdate, boolean throwException) {
+        LambdaQueryWrapper<UserDO> wrapper = Wrappers.<UserDO>query().lambda();
+        wrapper.eq(UserDO::getUserName, entityBO.getUserName());
+        wrapper.last(QueryWrapperConstant.LIMIT_ONE);
+        UserDO one = userManager.getOne(wrapper);
+        if (Objects.isNull(one)) {
+            return false;
+        }
+        boolean duplicate = !isUpdate || !one.getId().equals(entityBO.getId());
+        if (throwException && duplicate) {
+            throw new DuplicateException("User has been duplicated");
+        }
+        return duplicate;
+    }
+
+    /**
+     * 根据 主键ID 获取
+     *
+     * @param id             ID
+     * @param throwException 是否抛异常
+     * @return {@link UserDO}
+     */
+    private UserDO getDOById(Long id, boolean throwException) {
+        UserDO entityDO = userManager.getById(id);
+        if (throwException && Objects.isNull(entityDO)) {
+            throw new NotFoundException("User does not exist");
+        }
+        return entityDO;
+    }
+
+}

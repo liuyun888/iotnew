@@ -1,0 +1,79 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+syntax = "proto3";
+
+package api.common.manager;
+
+/*
+Config
+*/
+option java_package = "io.github.pnoker.api.center.manager";
+option java_outer_classname = "QueryProto";
+option objc_class_prefix = "Manager";
+option java_multiple_files = true;
+
+/*
+驱动ID Query
+驱动查询结构体，用于根据驱动ID查询驱动信息
+*/
+message GrpcDriverQuery {
+  /*
+  驱动ID
+  标识具体的驱动实例
+  */
+  int64 driver_id = 1;
+}
+
+/*
+Profile ID Query
+配置模板查询结构体，用于根据配置模板ID查询模板信息
+*/
+message GrpcProfileQuery {
+  /*
+  Profile ID
+  配置模板ID，标识具体的配置模板
+  */
+  int64 profile_id = 1;
+}
+
+/*
+Point ID Query
+点位查询结构体，用于根据点位ID查询点位信息
+*/
+message GrpcPointQuery {
+  /*
+  Point ID
+  点位ID，标识具体的点位
+  */
+  int64 point_id = 1;
+}
+
+/*
+Device ID Query
+设备查询结构体，用于根据设备ID查询设备信息
+*/
+message GrpcDeviceQuery {
+  /*
+  Device ID
+  设备ID，标识具体的设备
+  */
+  int64 device_id = 1;
+}
+
+
+

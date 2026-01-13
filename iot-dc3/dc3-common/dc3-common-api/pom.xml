@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2016-present the IoT DC3 original author or authors.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.pnoker</groupId>
+        <artifactId>dc3-common</artifactId>
+        <version>2025.9.3</version>
+    </parent>
+
+    <name>${project.artifactId}</name>
+    <artifactId>dc3-common-api</artifactId>
+    <version>2025.9.3</version>
+    <packaging>jar</packaging>
+
+    <description>IoT DC3 平台 Api 通用 gRpc Proto。</description>
+
+    <developers>
+        <developer>
+            <id>pnoker</id>
+            <name>pnoker</name>
+            <email>pnokers@icloud.com</email>
+            <roles>
+                <role>PMC</role>
+            </roles>
+            <organization>pnoker.github.io</organization>
+            <url>https://github.com/pnoker/iot-dc3</url>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>GNU Affero General Public License v3.0</name>
+            <url>https://www.gnu.org/licenses/agpl-3.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/pnoker/iot-dc3</url>
+        <connection>https://github.com/pnoker/iot-dc3.git</connection>
+        <developerConnection>https://github.com/pnoker/iot-dc3.git</developerConnection>
+    </scm>
+
+    <dependencies>
+
+        <!--
+        Javax Annotation Api
+        注意: 需要替换为jakarta.annotation-api, 但grpc官方暂时还没有响应但解决方案, 只能暂时添加这个兼容包
+        -->
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+        </dependency>
+
+        <!-- gRpc -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty</artifactId>
+        </dependency>
+
+        <!-- gRpc Protobuf -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+        </dependency>
+
+        <!-- gRpc Stub -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+        </dependency>
+
+        <!-- Netty -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-resolver-dns-native-macos</artifactId>
+        </dependency>
+
+        <!-- DC3 Common 相关 -->
+        <dependency>
+            <groupId>io.github.pnoker</groupId>
+            <artifactId>dc3-common-exception</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.pnoker</groupId>
+            <artifactId>dc3-common-model</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <extensions>
+            <!-- OS 插件 -->
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>${os.maven.plugin.version}</version>
+            </extension>
+        </extensions>
+
+        <plugins>
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

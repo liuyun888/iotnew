@@ -1,0 +1,111 @@
+#
+# Copyright 2016-present the IoT DC3 original author or authors.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+services:
+  grafana:
+    image: registry.cn-beijing.aliyuncs.com/dc3/dc3-grafana:2025.9
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SERVER_ROOT_URL=http://dc3-grafana:3000
+    container_name: dc3-grafana
+    hostname: dc3-grafana
+    volumes:
+      - grafana:/var/lib/grafana
+    logging:
+      driver: json-file
+      options:
+        max-size: "10M"
+        max-file: "20"
+    networks:
+      dc3net:
+        aliases:
+          - dc3-grafana
+
+  prometheus:
+    image: registry.cn-beijing.aliyuncs.com/dc3/dc3-prometheus:2025.9
+    restart: always
+    container_name: dc3-prometheus
+    hostname: dc3-prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=7d"
+    volumes:
+      - prometheus:/prometheus
+    logging:
+      driver: json-file
+      options:
+        max-size: "10M"
+        max-file: "20"
+    networks:
+      dc3net:
+        aliases:
+          - dc3-prometheus
+
+  postgres-exporter:
+    image: registry.cn-beijing.aliyuncs.com/dc3/dc3-postgres-exporter:2025.9
+    restart: always
+    container_name: dc3-postgres-exporter
+    hostname: dc3-postgres-exporter
+    logging:
+      driver: json-file
+      options:
+        max-size: "10M"
+        max-file: "20"
+    networks:
+      dc3net:
+        aliases:
+          - dc3-postgres-exporter
+
+  redis-exporter:
+    image: registry.cn-beijing.aliyuncs.com/dc3/dc3-redis-exporter:2025.9
+    restart: always
+    container_name: dc3-redis-exporter
+    hostname: dc3-redis-exporter
+    logging:
+      driver: json-file
+      options:
+        max-size: "10M"
+        max-file: "20"
+    networks:
+      dc3net:
+        aliases:
+          - dc3-redis-exporter
+
+  nginx-exporter:
+    image: registry.cn-beijing.aliyuncs.com/dc3/dc3-nginx-exporter:2025.9
+    restart: always
+    container_name: dc3-nginx-exporter
+    hostname: dc3-nginx-exporter
+    logging:
+      driver: json-file
+      options:
+        max-size: "10M"
+        max-file: "20"
+    networks:
+      dc3net:
+        aliases:
+          - dc3-nginx-exporter
+
+volumes:
+  prometheus:
+  grafana:
+
+networks:
+  dc3net:
+    driver: bridge

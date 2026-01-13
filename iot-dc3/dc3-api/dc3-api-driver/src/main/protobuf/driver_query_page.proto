@@ -1,0 +1,105 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+syntax = "proto3";
+
+package api.common.driver;
+
+import "api/common/page.proto";
+
+/*
+Config
+*/
+option java_package = "io.github.pnoker.api.common.driver";
+option java_outer_classname = "QueryPageProto";
+option objc_class_prefix = "Driver";
+option java_multiple_files = true;
+
+/*
+Page Device Query
+设备分页查询结构体，用于分页查询设备信息
+*/
+message GrpcPageDeviceQuery {
+  /*
+  Page
+  分页信息，包含页码、页大小、总数等
+  */
+  GrpcPage page = 1;
+
+  /*
+  租户ID
+  标识所属租户
+  */
+  int64 tenant_id = 2;
+
+  /*
+  驱动ID
+  标识设备所属的驱动
+  */
+  int64 driver_id = 3;
+
+  /*
+  Device ID
+  设备ID，用于精确查询特定设备
+  */
+  int64 device_id = 4;
+}
+
+/*
+Page Point Query
+点位分页查询结构体，用于分页查询点位信息
+*/
+message GrpcPagePointQuery {
+  /*
+  Page
+  分页信息，包含页码、页大小、总数等
+  */
+  GrpcPage page = 1;
+
+  /*
+  租户ID
+  标识所属租户
+  */
+  int64 tenant_id = 2;
+
+  /*
+  驱动ID
+  标识点位所属的驱动
+  */
+  int64 driver_id = 3;
+
+  /*
+  Device ID
+  设备ID，用于查询特定设备下的点位
+  */
+  int64 device_id = 4;
+
+  /*
+  Profile ID
+  配置模板ID，用于查询特定模板下的点位
+  */
+  int64 profile_id = 5;
+
+  /*
+  Point ID
+  点位ID，用于精确查询特定点位
+  */
+  int64 point_id = 6;
+}
+
+
+

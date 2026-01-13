@@ -1,0 +1,91 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package io.github.pnoker.common.config;
+
+import io.github.pnoker.common.constant.common.EnvironmentConstant;
+import io.github.pnoker.common.utils.EnvironmentUtil;
+import io.github.pnoker.common.utils.HostUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.MutablePropertySources;
+
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Configuration class for initializing the driver-specific environment properties during application startup.
+ * This class implements the EnvironmentPostProcessor interface to manipulate environment properties before the
+ * Spring application context is refreshed.
+ * <p>
+ * On execution, the class performs the following:
+ * - Retrieves the driver node identifier from environment properties or generates a new one if not available.
+ * - Constructs driver-specific properties such as client identifier and service name.
+ * - Adds these environment properties to the application's property sources at the highest precedence.
+ * <p>
+ * Annotations:
+ * - {@code @Slf4j}: Provides a logger instance for the class.
+ * - {@code @Configuration}: Marks the class as a source of bean definitions.
+ * - {@code @Order}: Specifies the precedence of this configuration relative to others, ensuring it is
+ * executed at a specific point in the application's lifecycle.
+ * <p>
+ * The following environment properties are processed or generated:
+ * - {@code driver.node}: Identifier for the driver node (retrieved or generated).
+ * - {@code driver.tenant}: Name of the tenant for the driver.
+ * - {@code spring.application.name}: Name of the application.
+ * - {@code driver.service}: Constructed service name combining tenant and application name.
+ * - {@code driver.client}: Constructed client identifier using tenant, application name, and driver node.
+ * - {@code driver.host}: Host address of the application obtained via utility methods.
+ * <p>
+ * This configuration ensures that essential driver-specific properties are readily available across
+ * the application lifecycle by injecting them into the environment property sources.
+ */
+@Slf4j
+@Configuration
+@Order(Ordered.LOWEST_PRECEDENCE - 100)
+public class DriverEnvironmentConfig implements EnvironmentPostProcessor {
+
+    @Override
+    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+        String node = environment.getProperty(EnvironmentConstant.DRIVER_NODE, String.class);
+        if (StringUtils.isEmpty(node)) {
+            node = EnvironmentUtil.getNodeId();
+        }
+
+        String tenant = environment.getProperty(EnvironmentConstant.DRIVER_TENANT, String.class);
+        String name = environment.getProperty(EnvironmentConstant.SPRING_APPLICATION_NAME, String.class);
+        String client = MessageFormat.format("{0}/{1}/{2}", tenant, name, node);
+        String service = MessageFormat.format("{0}/{1}", tenant, name);
+
+        Map<String, Object> source = new HashMap<>(4);
+        source.put(EnvironmentConstant.DRIVER_NODE, node);
+        source.put(EnvironmentConstant.DRIVER_SERVICE, service);
+        source.put(EnvironmentConstant.DRIVER_HOST, HostUtil.localHost());
+        source.put(EnvironmentConstant.DRIVER_CLIENT, client);
+        MutablePropertySources propertySources = environment.getPropertySources();
+        propertySources.addFirst(new MapPropertySource("driver", source));
+    }
+
+}

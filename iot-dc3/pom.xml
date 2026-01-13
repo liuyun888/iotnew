@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2016-present the IoT DC3 original author or authors.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.pnoker</groupId>
+        <artifactId>dc3-parent</artifactId>
+        <version>2025.9.3</version>
+    </parent>
+
+    <name>${project.artifactId}</name>
+    <artifactId>iot-dc3</artifactId>
+    <version>2025.9.3</version>
+    <packaging>pom</packaging>
+
+    <inceptionYear>2016-2022</inceptionYear>
+    <url>https://github.com/pnoker/iot-dc3</url>
+    <description>
+        IoT DC3 is a fully open-source, distributed Internet of Things (IoT) platform built on Spring Cloud.
+        It accelerates IoT project development and simplifies IoT device management, offering a comprehensive solution for building robust IoT systems.
+        All components and code are fully open-source, ensuring transparency, flexibility, and community-driven innovation.
+    </description>
+
+    <developers>
+        <developer>
+            <id>pnoker</id>
+            <name>pnoker</name>
+            <email>pnokers@icloud.com</email>
+            <roles>
+                <role>PMC</role>
+            </roles>
+            <organization>pnoker.github.io</organization>
+            <url>https://github.com/pnoker/iot-dc3</url>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>GNU Affero General Public License v3.0</name>
+            <url>https://www.gnu.org/licenses/agpl-3.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/pnoker/iot-dc3</url>
+        <connection>https://github.com/pnoker/iot-dc3.git</connection>
+        <developerConnection>https://github.com/pnoker/iot-dc3.git</developerConnection>
+    </scm>
+
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+
+        <!-- DC3 Api 相关 -->
+        <dc3.api.auth.version>2025.9.3</dc3.api.auth.version>
+        <dc3.api.data.version>2025.9.3</dc3.api.data.version>
+        <dc3.api.driver.version>2025.9.3</dc3.api.driver.version>
+        <dc3.api.manager.version>2025.9.3</dc3.api.manager.version>
+
+        <!-- DC3 Common 相关 -->
+        <dc3.common.api.version>2025.9.3</dc3.common.api.version>
+        <dc3.common.auth.version>2025.9.3</dc3.common.auth.version>
+        <dc3.common.constant.version>2025.9.3</dc3.common.constant.version>
+        <dc3.common.dal.version>2025.9.3</dc3.common.dal.version>
+        <dc3.common.data.version>2025.9.3</dc3.common.data.version>
+        <dc3.common.driver.version>2025.9.3</dc3.common.driver.version>
+        <dc3.common.exception.version>2025.9.3</dc3.common.exception.version>
+        <dc3.common.gateway.version>2025.9.3</dc3.common.gateway.version>
+        <dc3.common.influx.version>2025.9.3</dc3.common.influx.version>
+        <dc3.common.log.version>2025.9.3</dc3.common.log.version>
+        <dc3.common.manager.version>2025.9.3</dc3.common.manager.version>
+        <dc3.common.model.version>2025.9.3</dc3.common.model.version>
+        <dc3.common.mqtt.version>2025.9.3</dc3.common.mqtt.version>
+        <dc3.common.postgres.version>2025.9.3</dc3.common.postgres.version>
+        <dc3.common.public.version>2025.9.3</dc3.common.public.version>
+        <dc3.common.quartz.version>2025.9.3</dc3.common.quartz.version>
+        <dc3.common.rabbitmq.version>2025.9.3</dc3.common.rabbitmq.version>
+        <dc3.common.redis.version>2025.9.3</dc3.common.redis.version>
+        <dc3.common.repository.version>2025.9.3</dc3.common.repository.version>
+        <dc3.common.thread.version>2025.9.3</dc3.common.thread.version>
+        <dc3.common.web.version>2025.9.3</dc3.common.web.version>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <!-- You can configure environment variables commonly used in development -->
+                <NODE_ENV>dev</NODE_ENV>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>test</id>
+            <properties>
+                <NODE_ENV>test</NODE_ENV>
+            </properties>
+        </profile>
+        <profile>
+            <id>pre</id>
+            <properties>
+                <NODE_ENV>pre</NODE_ENV>
+            </properties>
+        </profile>
+        <profile>
+            <id>pro</id>
+            <properties>
+                <NODE_ENV>pro</NODE_ENV>
+            </properties>
+        </profile>
+    </profiles>
+
+    <modules>
+        <module>dc3-api</module>
+        <module>dc3-common</module>
+        <module>dc3-center</module>
+        <module>dc3-driver</module>
+        <module>dc3-gateway</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- DC3 Api 相关 -->
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-api-auth</artifactId>
+                <version>${dc3.api.auth.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-api-data</artifactId>
+                <version>${dc3.api.data.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-api-driver</artifactId>
+                <version>${dc3.api.driver.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-api-manager</artifactId>
+                <version>${dc3.api.manager.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
+            <!-- DC3 Common 相关 -->
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-api</artifactId>
+                <version>${dc3.common.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-auth</artifactId>
+                <version>${dc3.common.auth.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-constant</artifactId>
+                <version>${dc3.common.constant.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-dal</artifactId>
+                <version>${dc3.common.dal.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-data</artifactId>
+                <version>${dc3.common.data.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-driver</artifactId>
+                <version>${dc3.common.driver.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-exception</artifactId>
+                <version>${dc3.common.exception.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-gateway</artifactId>
+                <version>${dc3.common.gateway.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-influx</artifactId>
+                <version>${dc3.common.influx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-log</artifactId>
+                <version>${dc3.common.log.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-manager</artifactId>
+                <version>${dc3.common.manager.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-model</artifactId>
+                <version>${dc3.common.model.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-mqtt</artifactId>
+                <version>${dc3.common.mqtt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-postgres</artifactId>
+                <version>${dc3.common.postgres.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-public</artifactId>
+                <version>${dc3.common.public.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-quartz</artifactId>
+                <version>${dc3.common.quartz.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-rabbitmq</artifactId>
+                <version>${dc3.common.rabbitmq.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-redis</artifactId>
+                <version>${dc3.common.redis.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-repository</artifactId>
+                <version>${dc3.common.repository.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-thread</artifactId>
+                <version>${dc3.common.thread.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pnoker</groupId>
+                <artifactId>dc3-common-web</artifactId>
+                <version>${dc3.common.web.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

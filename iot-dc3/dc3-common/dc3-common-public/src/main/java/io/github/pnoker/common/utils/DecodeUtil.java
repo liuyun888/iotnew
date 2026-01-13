@@ -1,0 +1,146 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package io.github.pnoker.common.utils;
+
+import io.github.pnoker.common.constant.common.ExceptionConstant;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.HexFormat;
+
+/**
+ * 编码 相关工具类
+ *
+ * @author pnoker
+ * @version 2025.9.0
+ * @since 2022.1.0
+ */
+@Slf4j
+public class DecodeUtil {
+
+    private DecodeUtil() {
+        throw new IllegalStateException(ExceptionConstant.UTILITY_CLASS);
+    }
+
+    /**
+     * 字节转字符串
+     * <p>
+     * UTF-8
+     *
+     * @param bytes 字节数组
+     * @return 字符串
+     */
+    public static String byteToString(byte[] bytes) {
+        return new String(bytes, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * 字符串转字节
+     * <p>
+     * UTF-8
+     *
+     * @param content 字符串
+     * @return 字节数组
+     */
+    public static byte[] stringToByte(String content) {
+        return content.getBytes(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * 获取 MD5 编码
+     *
+     * @param content 字符串
+     * @return MD5 字符串
+     */
+    public static String md5(String content) {
+        return DigestUtils.md5Hex(content);
+    }
+
+    /**
+     * 获取 MD5 编码
+     *
+     * @param content 字符串
+     * @param salt    盐值
+     * @return MD5 字符串
+     */
+    public static String md5(String content, String salt) {
+        return md5(content + salt);
+    }
+
+    /**
+     * 将字节流进行Base64编码
+     *
+     * @param bytes Byte Array
+     * @return Byte Array
+     */
+    public static byte[] encode(byte[] bytes) {
+        return Base64.getEncoder().encode(bytes);
+    }
+
+    /**
+     * 将字符串进行Base64编码
+     *
+     * @param content 字符串
+     * @return Byte Array
+     */
+    public static byte[] encode(String content) {
+        return encode(stringToByte(content));
+    }
+
+    /**
+     * 必须配合encode使用, 用于encode编码之后解码
+     *
+     * @param bytes Byte Array
+     * @return Byte Array
+     */
+    public static byte[] decode(byte[] bytes) {
+        return Base64.getDecoder().decode(bytes);
+    }
+
+    /**
+     * 必须配合encode使用, 用于encode编码之后解码
+     *
+     * @param content 字符串
+     * @return Byte Array
+     */
+    public static byte[] decode(String content) {
+        return decode(stringToByte(content));
+    }
+
+    /**
+     * 将字符串进行16进制编码
+     *
+     * @param content 字符串
+     * @return String
+     */
+    public static String enHexCode(String content) {
+        return HexFormat.of().formatHex((stringToByte(content)));
+    }
+
+    /**
+     * 必须配合enHexCode使用, 用于enHexCode编码之后解码
+     *
+     * @param content 字符串
+     * @return Byte Array
+     */
+    public static byte[] deHexCode(String content) {
+        return HexFormat.of().parseHex(content);
+    }
+}

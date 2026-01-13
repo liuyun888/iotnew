@@ -1,0 +1,16 @@
+**/.git
+**/.idea
+**/.mvn
+**/*.iml
+
+**/*logs
+
+**/.vs
+**/.vscode
+
+**/.settings
+**/.project
+
+**/*.iws
+**/*.ipr
+**/*.md

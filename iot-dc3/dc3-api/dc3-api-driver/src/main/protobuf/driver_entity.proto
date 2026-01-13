@@ -1,0 +1,70 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+syntax = "proto3";
+
+package api.common.driver;
+
+import "api/common/entity.proto";
+
+/*
+Config
+*/
+option java_package = "io.github.pnoker.api.common.driver";
+option java_outer_classname = "EntityProto";
+option objc_class_prefix = "Driver";
+option java_multiple_files = true;
+
+/*
+驱动注册信息
+驱动向平台注册时传递的完整信息结构体
+*/
+message GrpcDriverRegisterDTO {
+  /*
+  Tenant name
+  租户编号
+  标识驱动所属的租户
+  */
+  string tenant = 1;
+
+  /*
+  Driver client name
+  驱动服务+随机节点编号
+  驱动服务的唯一标识，通常包含服务名和节点编号
+  */
+  string client = 2;
+
+  /*
+  Driver property
+  驱动的基本属性信息
+  */
+  GrpcDriverDTO driver = 3;
+
+  /*
+  Driver attribute list
+  驱动属性列表，定义驱动支持的配置参数
+  */
+  repeated GrpcDriverAttributeDTO driver_attributes = 4;
+
+  /*
+  Point attribute list
+  点位属性列表，定义驱动支持的点位配置参数
+  */
+  repeated GrpcPointAttributeDTO point_attributes = 5;
+}
+
+

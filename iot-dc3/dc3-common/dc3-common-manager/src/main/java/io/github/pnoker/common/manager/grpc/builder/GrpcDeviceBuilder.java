@@ -1,0 +1,120 @@
+/*
+ * Copyright 2016-present the IoT DC3 original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package io.github.pnoker.common.manager.grpc.builder;
+
+import io.github.pnoker.api.center.manager.GrpcPageDeviceQuery;
+import io.github.pnoker.api.common.GrpcBase;
+import io.github.pnoker.api.common.GrpcDeviceDTO;
+import io.github.pnoker.common.constant.common.DefaultConstant;
+import io.github.pnoker.common.entity.common.Pages;
+import io.github.pnoker.common.manager.entity.bo.DeviceBO;
+import io.github.pnoker.common.manager.entity.query.DeviceQuery;
+import io.github.pnoker.common.optional.CollectionOptional;
+import io.github.pnoker.common.optional.EnableOptional;
+import io.github.pnoker.common.utils.GrpcBuilderUtil;
+import io.github.pnoker.common.utils.JsonUtil;
+import io.github.pnoker.common.utils.MapStructUtil;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
+import java.util.Optional;
+
+/**
+ * GrpcDevice Builder
+ *
+ * @author pnoker
+ * @version 2025.9.0
+ * @since 2022.1.0
+ */
+@Mapper(componentModel = "spring", uses = {MapStructUtil.class})
+public interface GrpcDeviceBuilder {
+
+    /**
+     * Grpc Query to Query
+     *
+     * @param entityQuery GrpcPageDeviceQuery
+     * @return DeviceQuery
+     */
+    @Mapping(target = "page", ignore = true)
+    @Mapping(target = "enableFlag", ignore = true)
+    DeviceQuery buildQueryByGrpcQuery(GrpcPageDeviceQuery entityQuery);
+
+    @AfterMapping
+    default void afterProcess(GrpcPageDeviceQuery entityGrpc, @MappingTarget DeviceQuery.DeviceQueryBuilder entityQuery) {
+        Pages pages = GrpcBuilderUtil.buildPagesByGrpcPage(entityGrpc.getPage());
+        entityQuery.page(pages);
+
+        EnableOptional.ofNullable(entityGrpc.getEnableFlag()).ifPresent(entityQuery::enableFlag);
+    }
+
+    /**
+     * Grpc Query to Query
+     *
+     * @param entityQuery GrpcPageDeviceQuery
+     * @return DeviceQuery
+     */
+    @Mapping(target = "page", ignore = true)
+    @Mapping(target = "deviceName", ignore = true)
+    @Mapping(target = "deviceCode", ignore = true)
+    @Mapping(target = "enableFlag", ignore = true)
+    @Mapping(target = "version", ignore = true)
+    @Mapping(target = "profileId", ignore = true)
+    DeviceQuery buildQueryByGrpcQuery(io.github.pnoker.api.common.driver.GrpcPageDeviceQuery entityQuery);
+
+    @AfterMapping
+    default void afterProcess(io.github.pnoker.api.common.driver.GrpcPageDeviceQuery entityGrpc, @MappingTarget DeviceQuery.DeviceQueryBuilder entityQuery) {
+        Pages pages = GrpcBuilderUtil.buildPagesByGrpcPage(entityGrpc.getPage());
+        entityQuery.page(pages);
+    }
+
+    /**
+     * BO to Grpc DTO
+     *
+     * @param entityBO DeviceBO
+     * @return GrpcDeviceDTO
+     */
+    @Mapping(target = "deviceExt", ignore = true)
+    @Mapping(target = "profileIdsList", ignore = true)
+    @Mapping(target = "enableFlag", ignore = true)
+    @Mapping(target = "deviceNameBytes", ignore = true)
+    @Mapping(target = "deviceCodeBytes", ignore = true)
+    @Mapping(target = "deviceExtBytes", ignore = true)
+    @Mapping(target = "signatureBytes", ignore = true)
+    @Mapping(target = "mergeFrom", ignore = true)
+    @Mapping(target = "clearField", ignore = true)
+    @Mapping(target = "clearOneof", ignore = true)
+    @Mapping(target = "base", ignore = true)
+    @Mapping(target = "mergeBase", ignore = true)
+    @Mapping(target = "unknownFields", ignore = true)
+    @Mapping(target = "mergeUnknownFields", ignore = true)
+    @Mapping(target = "allFields", ignore = true)
+    GrpcDeviceDTO buildGrpcDTOByBO(DeviceBO entityBO);
+
+    @AfterMapping
+    default void afterProcess(DeviceBO entityBO, @MappingTarget GrpcDeviceDTO.Builder entityGrpc) {
+        GrpcBase grpcBase = GrpcBuilderUtil.buildGrpcBaseByBO(entityBO);
+        entityGrpc.setBase(grpcBase);
+
+        CollectionOptional.ofNullable(entityBO.getProfileIds()).ifPresent(entityGrpc::addAllProfileIds);
+        Optional.ofNullable(entityBO.getDeviceExt()).ifPresent(value -> entityGrpc.setDeviceExt(JsonUtil.toJsonString(value)));
+        Optional.ofNullable(entityBO.getEnableFlag()).ifPresentOrElse(value -> entityGrpc.setEnableFlag(value.getIndex()), () -> entityGrpc.setEnableFlag(DefaultConstant.DEFAULT_INT));
+    }
+
+}

@@ -1,0 +1,74 @@
+#
+# Copyright 2016-present the IoT DC3 original author or authors.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+driver:
+  tenant: default
+  name: PlcS7驱动
+  code: PlcS7Driver
+  type: DRIVER_CLIENT
+  remark: @project.description@
+  schedule:
+    # 定时读数据
+    read:
+      enable: true
+      cron: '0/30 * * * * ?'
+    custom:
+      enable: true
+      cron: '0/5 * * * * ?'
+  driver-attribute:
+    - attribute-name: 主机
+      attribute-code: host
+      attribute-type-flag: STRING
+      default-value: 192.168.0.20
+      remark: Ip
+    - attribute-name: 端口
+      attribute-code: port
+      attribute-type-flag: INT
+      default-value: 102
+      remark: Port
+  point-attribute:
+    - attribute-name: DB序号
+      attribute-code: dbNum
+      attribute-type-flag: INT
+      default-value: 0
+      remark: 数据块号, 从 0 开始计数
+    - attribute-name: 字偏移
+      attribute-code: byteOffset
+      attribute-type-flag: INT
+      default-value: 0
+      remark: 字偏移
+    - attribute-name: 位偏移
+      attribute-code: bitOffset
+      attribute-type-flag: INT
+      default-value: 0
+      remark: 位偏移
+    - attribute-name: 数据块长度
+      attribute-code: blockSize
+      attribute-type-flag: INT
+      default-value: 8
+      remark: 数据块长度
+
+spring:
+  application:
+    name: @project.artifactId@
+  profiles:
+    active:
+      - ${NODE_ENV:dev}
+
+logging:
+  file:
+    name: dc3/logs/driver/plcs7/${spring.application.name}.log
