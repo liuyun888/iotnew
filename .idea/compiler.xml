@@ -26,53 +26,6 @@
         <module name="sip-server" />
         <module name="fastbee-admin" />
       </profile>
-      <profile name="Annotation profile for iot-dc3" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$PROJECT_DIR$/../../mavenresip/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
-          <entry name="$PROJECT_DIR$/../../mavenresip/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
-          <entry name="$PROJECT_DIR$/../../mavenresip/org/mapstruct/mapstruct/1.6.3/mapstruct-1.6.3.jar" />
-          <entry name="$PROJECT_DIR$/../../mavenresip/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
-        </processorPath>
-        <module name="dc3-common-constant" />
-        <module name="dc3-common-driver" />
-        <module name="dc3-driver-opc-ua" />
-        <module name="dc3-center-manager" />
-        <module name="dc3-api-manager" />
-        <module name="dc3-center-auth" />
-        <module name="dc3-driver-plcs7" />
-        <module name="dc3-api-auth" />
-        <module name="dc3-api-driver" />
-        <module name="dc3-common-gateway" />
-        <module name="dc3-driver-modbus-tcp" />
-        <module name="dc3-common-redis" />
-        <module name="dc3-common-exception" />
-        <module name="dc3-common-log" />
-        <module name="dc3-center-data" />
-        <module name="dc3-common-mqtt" />
-        <module name="dc3-common-auth" />
-        <module name="dc3-driver-virtual" />
-        <module name="dc3-common-data" />
-        <module name="dc3-common-rabbitmq" />
-        <module name="dc3-common-manager" />
-        <module name="dc3-common-quartz" />
-        <module name="dc3-common-public" />
-        <module name="dc3-common-repository" />
-        <module name="dc3-common-web" />
-        <module name="dc3-driver-listening-virtual" />
-        <module name="dc3-gateway" />
-        <module name="dc3-common-thread" />
-        <module name="dc3-common-dal" />
-        <module name="dc3-common-postgres" />
-        <module name="dc3-driver-mqtt" />
-        <module name="dc3-driver-opc-da" />
-        <module name="dc3-api-data" />
-        <module name="dc3-common-api" />
-        <module name="dc3-center-single" />
-        <module name="dc3-common-model" />
-      </profile>
       <profile name="Annotation profile for yudao" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -111,6 +64,53 @@
         <module name="yudao-module-system-api" />
         <module name="yudao-module-infra-server" />
         <module name="gc-module-datacenter-server" />
+      </profile>
+      <profile name="Annotation profile for iot-dc3" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct/1.6.3/mapstruct-1.6.3.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
+        </processorPath>
+        <module name="dc3-common-constant" />
+        <module name="dc3-common-driver" />
+        <module name="dc3-driver-opc-ua" />
+        <module name="dc3-center-manager" />
+        <module name="dc3-api-manager" />
+        <module name="dc3-center-auth" />
+        <module name="dc3-driver-plcs7" />
+        <module name="dc3-api-auth" />
+        <module name="dc3-api-driver" />
+        <module name="dc3-common-gateway" />
+        <module name="dc3-driver-modbus-tcp" />
+        <module name="dc3-common-redis" />
+        <module name="dc3-common-exception" />
+        <module name="dc3-common-log" />
+        <module name="dc3-center-data" />
+        <module name="dc3-common-mqtt" />
+        <module name="dc3-common-auth" />
+        <module name="dc3-driver-virtual" />
+        <module name="dc3-common-data" />
+        <module name="dc3-common-rabbitmq" />
+        <module name="dc3-common-manager" />
+        <module name="dc3-common-quartz" />
+        <module name="dc3-common-public" />
+        <module name="dc3-common-repository" />
+        <module name="dc3-common-web" />
+        <module name="dc3-gateway" />
+        <module name="dc3-driver-listening-virtual" />
+        <module name="dc3-common-thread" />
+        <module name="dc3-common-dal" />
+        <module name="dc3-common-postgres" />
+        <module name="dc3-driver-mqtt" />
+        <module name="dc3-driver-opc-da" />
+        <module name="dc3-api-data" />
+        <module name="dc3-common-api" />
+        <module name="dc3-center-single" />
+        <module name="dc3-common-model" />
       </profile>
     </annotationProcessing>
   </component>
